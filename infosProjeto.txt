@@ -1,0 +1,50 @@
+ETAPA 1:
+  REGRAS DE NEGÓCIO:
+
+  - A NÍVEL DE RELACIONAMENTO:
+    -> UMA TURMA PODE EXISTIR SEM ALUNOS OU PODE TER VÁRIOS ALUNOS. UM ALUNO SÓ PODE ESTAR EM UMA TURMA.
+    -> UMA TURMA PODE POSSUIR MAIS DE UM PROFESSOR. UM PROFESSOR PODE LECIONAR EM VÁRIAS TURMAS.
+    -> UMA TURMA DEVE ESTAR ASSOCIADA A UM ÚNICO CURSO. UM CURSO PODE TER VÁRIAS TURMAS.DE
+
+  - A NIVEL DE VALIDAÇÃO:
+    -> O CPF E O EMAIL DEVEM SER VÁLIDOS;
+    -> O NOME DO ALUNO E O NOME DO PROFESSOR DEVE TER PELO MENOS DUAS PALAVRAS SEPARADAS POR UM ESPAÇO
+    -> O NOME DO CURSO E DA TURMA SÃO ATRIBUTOS OBRIGATÓRIOS;
+    -> A ESPECIALIDADE É UM ATRIBUTO OPCIONAL, MAS SE FOR DIGITADO, DEVE TER DUAS PALAVRAS SEPARADAS POR ESPAÇO;
+
+ETAPA 2:
+  Parte 1 - FILTROS COM QUERY METHODS OU JPQLs
+    1. ALUNO;
+      -> Buscar alunos pelo COMEÇO do nome;
+      -> Buscar alunos por QUALQUER PARTE do número de telefone;
+      -> Buscar alunos pelo nome da turma.
+
+    2. PROFESSOR;
+      -> Buscar professores pelo COMEÇO do nome OU pelo COMEÇO da especialidade;
+      -> Buscar professores que NÃO possuem “@gmail.com” no e-mail cadastrado;
+      -> Buscar professores por email EXATO.
+
+
+    3. TURMA;
+      -> Buscar turmas ENTRE os anos X e Y;
+      -> Buscar turmas por semestre E ano;
+      -> Buscar turmas por nome E turno;
+      -> Buscar turmas pelo nome do curso.
+
+
+    3. CURSO;
+      -> Buscar cursos pelo nome sem case sensitive, ou seja, ignorando se tá maiúsculo ou minúsculo)
+
+  Parte 2 - REGRAS DE NEGÓCIO NOS SERVICES (THROW EXCEPTION)
+    1. ALUNO;
+      -> Não permitir a INSERÇÃO de um aluno com CPF já cadastrado. Caso aconteça, lançar throw new
+      RuntimeException("CPF já cadastrado!").
+      -> Antes de INSERIR ou ATUALIZAR um aluno, caso o telefone esteja nulo, o atributo cadastroCompleto
+      deve ser setado como false. Se estiver preenchido, setar como true.
+
+    2. PROFESSOR;
+      -> Não permitir a INSERÇÃO de um professor com email já cadastrado. Caso aconteça, lançar throw
+      new RuntimeException("Email já cadastrado!").
+      -> Não permitir a INSERÇÃO de um professor com email que contenha “@outlook.com”. Caso aconteça
+      a tentativa, lançar throw new RuntimeException(“Domínio de e-mail não permitido”).
+

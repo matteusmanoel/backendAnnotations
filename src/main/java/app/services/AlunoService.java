@@ -1,10 +1,10 @@
 package app.services;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import app.entities.Aluno;
 import app.repositories.AlunoRepository;
 import jakarta.persistence.EntityManager;
@@ -12,8 +12,9 @@ import jakarta.persistence.EntityTransaction;
 
 @Service
 public class AlunoService {
+
 	@Autowired
-	AlunoRepository alunoRepository;
+	private AlunoRepository alunoRepository;
 
 	private EntityManager entityManager;
 
@@ -21,55 +22,60 @@ public class AlunoService {
 		this.entityManager = entityManager;
 	}
 
+	private void validarNome(String nome) {
+		String regex = "^(\\S+\\s+\\S+.*)$";
+		if (!Pattern.matches(regex, nome)) {
+			throw new RuntimeException("O nome deve conter pelo menos duas palavras.");
+		}
+	}
+
+	private void verificarCpfDuplicado(String cpf) {
+		if (alunoRepository.findByCpf(cpf).isPresent()) {
+			throw new RuntimeException("CPF já cadastrado!");
+		}
+	}
+
+	private void ajustarCadastroCompleto(Aluno aluno) {
+		aluno.setCadastroCompleto(aluno.getTelefone() != null);
+	}
+
 	public String save(Aluno aluno) {
+		validarNome(aluno.getNome());
+		verificarCpfDuplicado(aluno.getCpf());
+		ajustarCadastroCompleto(aluno);
 
-		this.alunoRepository.save(aluno);
+		alunoRepository.save(aluno);
 		return "Aluno salvo com sucesso!";
-
 	}
 
 	public Aluno findById(long idAluno) {
-
-		Aluno aluno = this.alunoRepository.findById(idAluno).get();
-
-		return aluno;
-
+		return alunoRepository.findById(idAluno).orElseThrow(() -> new RuntimeException("Aluno não encontrado!"));
 	}
 
 	public List<Aluno> findAll() {
-
-		List<Aluno> aluno = this.alunoRepository.findAll();
-
-		return aluno;
-
+		return alunoRepository.findAll();
 	}
 
 	public String update(Aluno aluno, long id) {
-
 		EntityTransaction transaction = entityManager.getTransaction();
 		try {
 			transaction.begin();
+			validarNome(aluno.getNome());
+			ajustarCadastroCompleto(aluno);
 
-			// Atualizar o produto com o merge
-			aluno = entityManager.merge(aluno); // merge atualiza a entidade no banco
-
-			// Comitar a transação
+			aluno = entityManager.merge(aluno);
 			transaction.commit();
 		} catch (RuntimeException e) {
-			// Em caso de erro, fazer rollback
 			if (transaction.isActive()) {
 				transaction.rollback();
 			}
 			throw e;
 		}
 		return "Aluno atualizado com sucesso!";
-
 	}
 
 	public String delete(long id) {
-
-		this.alunoRepository.deleteById(id);
+		alunoRepository.deleteById(id);
 		return "Aluno deletado com sucesso!";
-
 	}
 }
