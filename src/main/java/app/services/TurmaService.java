@@ -1,24 +1,18 @@
 package app.services;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import app.entities.Turma;
 import app.repositories.TurmaRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 
 @Service
 public class TurmaService {
 
 	@Autowired
 	private TurmaRepository turmaRepository;
-
-	private EntityManager entityManager;
-
-	public TurmaService(EntityManager entityManager) {
-		this.entityManager = entityManager;
-	}
 
 	private void verificarTurmaDuplicada(String nome, String turno) {
 		if (!turmaRepository.findByNomeAndTurno(nome, turno).isEmpty()) {
@@ -41,28 +35,13 @@ public class TurmaService {
 	}
 
 	public String update(Turma turma, long id) {
-		EntityTransaction transaction = entityManager.getTransaction();
-		try {
-			transaction.begin();
+		Turma turmaExistente = turmaRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Turma não encontrada para atualização!"));
 
-			Turma turmaExistente = turmaRepository.findById(id)
-					.orElseThrow(() -> new RuntimeException("Turma não encontrada para atualização!"));
+		turmaExistente.setNome(turma.getNome());
+		turmaRepository.save(turmaExistente); // Substitui entityManager.merge()
 
-			turmaExistente.setNome(turma.getNome());
-			turmaExistente.setAno(turma.getAno());
-			turmaExistente.setSemestre(turma.getSemestre());
-			turmaExistente.setTurno(turma.getTurno());
-			turmaExistente.setCurso(turma.getCurso());
-
-			entityManager.merge(turmaExistente);
-			transaction.commit();
-		} catch (RuntimeException e) {
-			if (transaction.isActive()) {
-				transaction.rollback();
-			}
-			throw e;
-		}
-		return "Turma atualizada com sucesso!";
+		return "Turma atualizado com sucesso!";
 	}
 
 	public String delete(long id) {

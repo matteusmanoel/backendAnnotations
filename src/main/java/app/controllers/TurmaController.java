@@ -14,23 +14,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import app.entities.Aluno;
-import app.services.AlunoService;
+import app.entities.Turma;
+import app.services.TurmaService;
 
 @RestController
-@RequestMapping("/alunos")
-public class AlunoController {
+@RequestMapping("/turmas")
+public class TurmaController {
 
 	@Autowired // instancia uma unica vez
-	private AlunoService alunoService;
+	private TurmaService turmaService;
 
 	@PostMapping
-	public ResponseEntity<String> save(@RequestBody Aluno Aluno) {
+	public ResponseEntity<String> save(@RequestBody Turma turma) {
 
 		try {
 			// O que der certo
 
-			String mensagem = this.alunoService.save(Aluno);
+			String mensagem = this.turmaService.save(turma);
 
 			return new ResponseEntity<String>(mensagem, HttpStatus.OK);
 
@@ -43,10 +43,10 @@ public class AlunoController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<Aluno> findById(@PathVariable long id) {
+	public ResponseEntity<Turma> findById(@PathVariable long id) {
 		try {
-			Aluno aluno = this.alunoService.findById(id);
-			return new ResponseEntity<>(aluno, HttpStatus.OK);
+			Turma turma = this.turmaService.findById(id);
+			return new ResponseEntity<>(turma, HttpStatus.OK);
 		} catch (Exception e) {
 			// TODO: handle exception
 			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
@@ -54,10 +54,10 @@ public class AlunoController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<Aluno>> findAll() {
+	public ResponseEntity<List<Turma>> findAll() {
 		try {
-			List<Aluno> alunos = this.alunoService.findAll();
-			return new ResponseEntity<>(alunos, HttpStatus.OK);
+			List<Turma> turmas = this.turmaService.findAll();
+			return new ResponseEntity<>(turmas, HttpStatus.OK);
 		} catch (Exception e) {
 			// TODO: handle exception
 			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
@@ -65,9 +65,9 @@ public class AlunoController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<String> update(@RequestBody Aluno Aluno, @PathVariable long id) {
+	public ResponseEntity<String> update(@RequestBody Turma turma, @PathVariable long id) {
 		try {
-			String mensagem = this.alunoService.update(Aluno, id);
+			String mensagem = this.turmaService.update(turma, id);
 			return new ResponseEntity<>(mensagem, HttpStatus.OK);
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -78,7 +78,7 @@ public class AlunoController {
 	@DeleteMapping("/{id}")
 	public ResponseEntity<String> delete(@PathVariable long id) {
 		try {
-			String mensagem = this.alunoService.delete(id);
+			String mensagem = this.turmaService.delete(id);
 			return new ResponseEntity<>(mensagem, HttpStatus.OK);
 		} catch (Exception e) {
 			// TODO: handle exception

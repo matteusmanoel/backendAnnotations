@@ -5,22 +5,15 @@ import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import app.entities.Aluno;
 import app.repositories.AlunoRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 
 @Service
 public class AlunoService {
 
 	@Autowired
 	private AlunoRepository alunoRepository;
-
-	private EntityManager entityManager;
-
-	public AlunoService(EntityManager entityManager) {
-		this.entityManager = entityManager;
-	}
 
 	private void validarNome(String nome) {
 		String regex = "^(\\S+\\s+\\S+.*)$";
@@ -57,20 +50,12 @@ public class AlunoService {
 	}
 
 	public String update(Aluno aluno, long id) {
-		EntityTransaction transaction = entityManager.getTransaction();
-		try {
-			transaction.begin();
-			validarNome(aluno.getNome());
-			ajustarCadastroCompleto(aluno);
+		Aluno alunoExistente = alunoRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Aluno não encontrado para atualização!"));
 
-			aluno = entityManager.merge(aluno);
-			transaction.commit();
-		} catch (RuntimeException e) {
-			if (transaction.isActive()) {
-				transaction.rollback();
-			}
-			throw e;
-		}
+		alunoExistente.setNome(aluno.getNome());
+		alunoRepository.save(alunoExistente); // Substitui entityManager.merge()
+
 		return "Aluno atualizado com sucesso!";
 	}
 

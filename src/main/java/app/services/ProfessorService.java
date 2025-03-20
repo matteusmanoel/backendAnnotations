@@ -7,20 +7,12 @@ import org.springframework.stereotype.Service;
 
 import app.entities.Professor;
 import app.repositories.ProfessorRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 
 @Service
 public class ProfessorService {
 
 	@Autowired
 	private ProfessorRepository professorRepository;
-
-	private EntityManager entityManager;
-
-	public ProfessorService(EntityManager entityManager) {
-		this.entityManager = entityManager;
-	}
 
 	private void verificarEmailDuplicado(String email) {
 		if (professorRepository.findByEmail(email).isPresent()) {
@@ -35,10 +27,10 @@ public class ProfessorService {
 	}
 
 	public String save(Professor professor) {
-		verificarEmailDuplicado(professor.getEmail()); 
+		verificarEmailDuplicado(professor.getEmail());
 		verificarDominioEmail(professor.getEmail());
 
-		professorRepository.save(professor); 
+		professorRepository.save(professor);
 		return "Professor salvo com sucesso!";
 	}
 
@@ -52,20 +44,12 @@ public class ProfessorService {
 	}
 
 	public String update(Professor professor, long id) {
-		EntityTransaction transaction = entityManager.getTransaction();
-		try {
-			transaction.begin();
-			verificarEmailDuplicado(professor.getEmail());
-			verificarDominioEmail(professor.getEmail());
+		Professor professorExistente = professorRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Professor não encontrado para atualização!"));
 
-			professor = entityManager.merge(professor);
-			transaction.commit();
-		} catch (RuntimeException e) {
-			if (transaction.isActive()) {
-				transaction.rollback();
-			}
-			throw e;
-		}
+		professorExistente.setNome(professor.getNome());
+		professorRepository.save(professorExistente); // Substitui entityManager.merge()
+
 		return "Professor atualizado com sucesso!";
 	}
 
